@@ -20,29 +20,13 @@ type Planet struct {
 }
 
 func main() {
-
-	file, err := os.Open("planetarySystem.json")
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	defer file.Close()
-
-	byteVaue, _ := ioutil.ReadAll(file)
-
-	var planetSyst PlanetarySystem
-
-	json.Unmarshal(byteVaue, &planetSyst)
-
-	var input string
-
+	planetsyst := jsonToplaentsyst("planetarySystem.json")
 	fmt.Println("welcome to space Quest!")
-	fmt.Println("we are in the " + planetSyst.Name + " planetary system, it has " + strconv.Itoa(len(planetSyst.Planets)) + " planets!")
+	fmt.Println("we are in the " + planetsyst.Name + " planetary system, it has " + strconv.Itoa(len(planetsyst.Planets)) + " planets!")
 	fmt.Println("What is your name?")
-	fmt.Scanln(&input)
-	goToPlanet("Hello "+input+", do you want me to pick a planet for you?(Y/N)", planetSyst)
-
+	var username string
+	fmt.Scanln(&username)
+	goToPlanet("Hello "+username+", do you want me to pick a planet for you?(Y/N)", planetsyst)
 }
 
 func tellabout(planet string, info string) {
@@ -51,24 +35,43 @@ func tellabout(planet string, info string) {
 
 }
 
-func goToPlanet(intro string, planetSyst PlanetarySystem) {
+func goToPlanet(intro string, planetsyst PlanetarySystem) {
 	fmt.Println(intro)
-	var input string
-	fmt.Scanln(&input)
-	if input == "N" || input == "n" {
-		fmt.Println("What planet do you want to go to?")
-		fmt.Scanln(&input)
-		// var planet Planet
-		for _, planet := range planetSyst.Planets {
-			if planet.Name == input {
-				tellabout(planet.Name, planet.Info)
-			}
-		}
-	} else if input == "Y" || input == "y" {
-		planet := planetSyst.Planets[rand.Intn(len(planetSyst.Planets))]
+	var yn string
+	fmt.Scanln(&yn)
+	if yn == "N" || yn == "n" {
+		enterplanet(planetsyst)
+	} else if yn == "Y" || yn == "y" {
+		planet := planetsyst.Planets[rand.Intn(len(planetsyst.Planets))]
 		tellabout(planet.Name, planet.Info)
 
 	} else {
-		goToPlanet("Invalid input, enter (Y/N)", planetSyst)
+		goToPlanet("Invalid input, enter (Y/N)", planetsyst)
 	}
+}
+
+func enterplanet(planetsyst PlanetarySystem) {
+	var userplanet string
+	fmt.Println("What planet do you want to go to?")
+	fmt.Scanln(&userplanet)
+	for _, planet := range planetsyst.Planets {
+		if planet.Name == userplanet {
+			tellabout(planet.Name, planet.Info)
+			return
+		}
+	}
+	fmt.Println("invaild planet, enter another one!")
+	enterplanet(planetsyst)
+}
+
+func jsonToplaentsyst(filename string) PlanetarySystem {
+	file, err := os.Open(filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+	byteVaue, _ := ioutil.ReadAll(file)
+	var planetsyst PlanetarySystem
+	json.Unmarshal(byteVaue, &planetsyst)
+	return planetsyst
 }
